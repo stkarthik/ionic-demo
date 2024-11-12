@@ -70,7 +70,23 @@ export class PhotoService {
     reader.readAsDataURL(blob);
   });
 
-  constructor() { }
+  public async loadSaved() {
+    // Retrieve cached photo array data
+    const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
+    this.photos = (value ? JSON.parse(value) : []) as UserPhoto[];
+  
+    // more to come...
+    for (let photo of this.photos) {
+      // Read each saved photo's data from the Filesystem
+      const readFile = await Filesystem.readFile({
+        path: photo.filepath,
+        directory: Directory.Data,
+      });
+    
+      // Web platform only: Load the photo as base64 data
+      photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+    }
+  }
   
 }
 
